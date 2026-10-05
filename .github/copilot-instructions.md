@@ -98,7 +98,7 @@ Firebase SDK directly.
 ## Firebase
 
 - Use **Cloud Firestore** for persistent data storage
-- Use **Firebase Authentication** with Google Sign-In for user auth
+- Use **Firebase Authentication** with Anonymous sign-in; users identify themselves by name (no Google sign-in)
 - Wrap Firestore calls in service modules with typed return values
 - Handle loading and error states explicitly in any component that fetches data
 
