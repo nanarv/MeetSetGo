@@ -1,10 +1,11 @@
 import type { ComponentProps, ReactNode } from 'react';
-import type { Day } from '../types/meeting';
+import type { DateKey } from '../types/meeting';
+import { dayHeaderParts } from '../utilities/dates';
 import type { CellPosition } from '../utilities/grid';
 import { formatSlot, slotKey } from '../utilities/time';
 
 interface TimeGridProps extends ComponentProps<'div'> {
-  days: Day[];
+  days: DateKey[];
   slots: string[];
   renderCell: (position: CellPosition, key: string, slot: string) => ReactNode;
 }
@@ -16,11 +17,15 @@ export const TimeGrid = ({ days, slots, renderCell, className = '', ...rest }: T
       <div role="columnheader" className="w-16 shrink-0">
         <span className="sr-only">Time</span>
       </div>
-      {days.map((day) => (
-        <div key={day} role="columnheader" className="flex-1 pb-1 text-center text-sm font-semibold">
-          {day}
-        </div>
-      ))}
+      {days.map((day) => {
+        const { weekday, date } = dayHeaderParts(day);
+        return (
+          <div key={day} role="columnheader" className="flex-1 pb-1 text-center text-xs font-semibold sm:text-sm">
+            <span className="block">{weekday}</span>
+            {date && <span className="block text-[11px] font-normal text-gray-500">{date}</span>}
+          </div>
+        );
+      })}
     </div>
     {slots.map((slot, slotIndex) => (
       <div key={slot} role="row" className="flex">

@@ -1,4 +1,4 @@
-import type { Availability, CellState, Day } from '../types/meeting';
+import type { Availability, CellState, DateKey } from '../types/meeting';
 import { slotKey } from './time';
 
 export type Pen = CellState | 'erase';
@@ -10,7 +10,7 @@ export interface CellPosition {
 
 /** Keys of every cell in the rectangle spanned by two corners. */
 export const getRectangleKeys = (
-  days: Day[],
+  days: DateKey[],
   slots: string[],
   from: CellPosition,
   to: CellPosition,

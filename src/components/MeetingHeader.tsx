@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { deleteMeeting, updateMeetingDetails } from '../services/meetingService';
 import type { Meeting, MeetingDetails } from '../types/meeting';
+import { describeDays } from '../utilities/dates';
 import { errorMessage } from '../utilities/errors';
 import { formatDuration, formatTime, timeZoneName } from '../utilities/time';
 import { CopyLinkButton } from './CopyLinkButton';
@@ -61,7 +62,7 @@ export const MeetingHeader = ({ meeting, isCreator }: MeetingHeaderProps) => {
         )}
       </div>
       <p className="text-sm text-gray-600">
-        {formatDuration(meeting.durationMinutes)} · {meeting.days.join(', ')} ·{' '}
+        {formatDuration(meeting.durationMinutes)} · {describeDays(meeting)} ·{' '}
         {formatTime(meeting.startTime)}–{formatTime(meeting.endTime)} ({timeZoneName(meeting.timeZone)})
         {meeting.location && <> · 📍 {meeting.location}</>}
       </p>

@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import { useMyMeetings } from '../hooks/useMyMeetings';
+import { describeDays, formatDayLong } from '../utilities/dates';
 import { formatTime } from '../utilities/time';
 import { StatusMessage } from './StatusMessage';
 
@@ -30,8 +31,13 @@ export const MyMeetingsList = ({ userId }: MyMeetingsListProps) => {
               >
                 <span className="block font-semibold">{meeting.title}</span>
                 <span className="block text-sm text-gray-600">
-                  {meeting.days.join(', ')} · {formatTime(meeting.startTime)}–{formatTime(meeting.endTime)}
+                  {describeDays(meeting)} · {formatTime(meeting.startTime)}–{formatTime(meeting.endTime)}
                 </span>
+                {meeting.chosenTime && (
+                  <span className="block text-sm font-medium text-emerald-700">
+                    ✅ {formatDayLong(meeting.chosenTime.date)}, {formatTime(meeting.chosenTime.startTime)}
+                  </span>
+                )}
                 <span className="block text-sm text-gray-600">
                   {meeting.participantIds.length} responded
                   {meeting.creatorId === userId && ' · you organize'}

@@ -14,7 +14,14 @@ import {
   type Timestamp,
   type Unsubscribe,
 } from 'firebase/firestore';
-import type { Availability, Meeting, MeetingDetails, NewMeeting, Participant } from '../types/meeting';
+import type {
+  Availability,
+  ChosenTime,
+  Meeting,
+  MeetingDetails,
+  NewMeeting,
+  Participant,
+} from '../types/meeting';
 import { generateShortId } from '../utilities/shortId';
 import { db } from './firebase';
 
@@ -33,6 +40,11 @@ const toMeeting = (id: string, data: DocumentData): Meeting => ({
   location: data.location ?? '',
   durationMinutes: data.durationMinutes,
   days: data.days,
+  // Meetings created before date ranges existed have no start/end date or weekday filter.
+  startDate: data.startDate ?? '',
+  endDate: data.endDate ?? '',
+  weekdays: data.weekdays ?? [],
+  chosenTime: data.chosenTime ?? null,
   startTime: data.startTime,
   endTime: data.endTime,
   timeZone: data.timeZone,
@@ -143,6 +155,11 @@ export const saveAvailability = async (
 
 export const updateMeetingDetails = async (meetingId: string, details: MeetingDetails): Promise<void> => {
   await updateDoc(meetingRef(meetingId), { ...details });
+};
+
+/** Organizer only (see firestore.rules). Pass null to clear the pick. */
+export const setChosenTime = async (meetingId: string, chosenTime: ChosenTime | null): Promise<void> => {
+  await updateDoc(meetingRef(meetingId), { chosenTime });
 };
 
 export const deleteMeeting = async (meetingId: string): Promise<void> => {

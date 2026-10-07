@@ -1,4 +1,4 @@
-import type { Day } from '../types/meeting';
+import type { DateKey } from '../types/meeting';
 
 export const SLOT_MINUTES = 15;
 
@@ -29,7 +29,10 @@ export const getTimeSlots = (startTime: string, endTime: string): string[] => {
   return slots;
 };
 
-export const slotKey = (day: Day, slot: string): string => `${day}-${slot}`;
+export const slotKey = (day: DateKey, slot: string): string => `${day}-${slot}`;
+
+/** "0930" → "09:30" */
+export const slotToTime = (slot: string): string => `${slot.slice(0, 2)}:${slot.slice(2)}`;
 
 /** "0930" → "9:30 AM" */
 export const formatSlot = (slot: string): string => {

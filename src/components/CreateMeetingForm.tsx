@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import { DAYS, type CreateMeetingValues, type Day, type MeetingDetails } from '../types/meeting';
+import { DAYS, type CreateMeetingValues, type MeetingDetails, type Weekday } from '../types/meeting';
+import { addDays, MAX_DAYS, todayKey } from '../utilities/dates';
 import { errorMessage } from '../utilities/errors';
 import { formatTime, TIME_OPTIONS } from '../utilities/time';
 import { validateMeeting } from '../utilities/validation';
@@ -14,14 +15,23 @@ const INITIAL_DETAILS: MeetingDetails = { title: '', description: '', location: 
 export const CreateMeetingForm = ({ onSubmit }: CreateMeetingFormProps) => {
   const [name, setName] = useState('');
   const [details, setDetails] = useState(INITIAL_DETAILS);
-  const [days, setDays] = useState<Day[]>(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
+  const [today] = useState(todayKey);
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(() => addDays(today, MAX_DAYS - 1));
+  const [weekdays, setWeekdays] = useState<Weekday[]>(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('17:00');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const toggleDay = (day: Day) => {
-    setDays(DAYS.filter((d) => (d === day ? !days.includes(d) : days.includes(d))));
+  const toggleWeekday = (day: Weekday) => {
+    setWeekdays(DAYS.filter((d) => (d === day ? !weekdays.includes(d) : weekdays.includes(d))));
+  };
+
+  const handleStartDateChange = (value: string) => {
+    setStartDate(value);
+    // Keep the range valid when the start moves past the end.
+    if (value && endDate && value > endDate) setEndDate(value);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -32,7 +42,9 @@ export const CreateMeetingForm = ({ onSubmit }: CreateMeetingFormProps) => {
       location: details.location.trim(),
       description: details.description.trim(),
       name: name.trim(),
-      days,
+      startDate,
+      endDate,
+      weekdays,
       startTime,
       endTime,
     };
@@ -68,8 +80,15 @@ export const CreateMeetingForm = ({ onSubmit }: CreateMeetingFormProps) => {
 
       <MeetingDetailsFields value={details} onChange={setDetails} />
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <DateField id="start-date" label="Start date" value={startDate} min={today} onChange={handleStartDateChange} />
+        <DateField id="end-date" label="End date" value={endDate} min={startDate || today} onChange={setEndDate} />
+      </div>
+
       <fieldset className="flex flex-col gap-1">
-        <legend className="mb-1 text-sm font-medium">Days of the week</legend>
+        <legend className="mb-1 text-sm font-medium">
+          Include these days of the week <span className="font-normal text-gray-500">(at most {MAX_DAYS} dates)</span>
+        </legend>
         <div className="flex flex-wrap gap-2">
           {DAYS.map((day) => (
             <label
@@ -78,8 +97,8 @@ export const CreateMeetingForm = ({ onSubmit }: CreateMeetingFormProps) => {
             >
               <input
                 type="checkbox"
-                checked={days.includes(day)}
-                onChange={() => toggleDay(day)}
+                checked={weekdays.includes(day)}
+                onChange={() => toggleWeekday(day)}
                 className="sr-only"
               />
               {day}
@@ -109,6 +128,38 @@ export const CreateMeetingForm = ({ onSubmit }: CreateMeetingFormProps) => {
     </form>
   );
 };
+
+interface DateFieldProps {
+  id: string;
+  label: string;
+  value: string;
+  min: string;
+  onChange: (value: string) => void;
+}
+
+/** Type a date (e.g. 10/06/2026) or click the box to pick one from a calendar. */
+const DateField = ({ id, label, value, min, onChange }: DateFieldProps) => (
+  <div className="flex flex-col gap-1">
+    <label htmlFor={id} className="text-sm font-medium">
+      {label}
+    </label>
+    <input
+      id={id}
+      type="date"
+      value={value}
+      min={min}
+      onChange={(e) => onChange(e.target.value)}
+      onClick={(e) => {
+        try {
+          e.currentTarget.showPicker();
+        } catch {
+          // Not supported, or the browser declined; typing still works.
+        }
+      }}
+      className="w-full rounded border border-gray-300 px-3 py-2"
+    />
+  </div>
+);
 
 interface TimeSelectProps {
   id: string;

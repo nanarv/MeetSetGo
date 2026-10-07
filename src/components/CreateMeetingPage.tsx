@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router';
 import { useCurrentUser } from '../hooks/useAuth';
 import { createMeeting } from '../services/meetingService';
 import type { CreateMeetingValues } from '../types/meeting';
+import { getDatesInRange } from '../utilities/dates';
 import { detectTimeZone, timeZoneName } from '../utilities/time';
 import { CreateMeetingForm } from './CreateMeetingForm';
 
@@ -11,7 +12,8 @@ export const CreateMeetingPage = () => {
   const timeZone = detectTimeZone();
 
   const handleSubmit = async ({ name, ...meeting }: CreateMeetingValues) => {
-    const id = await createMeeting({ ...meeting, timeZone }, { uid: user.uid, name });
+    const days = getDatesInRange(meeting.startDate, meeting.endDate, meeting.weekdays);
+    const id = await createMeeting({ ...meeting, days, timeZone }, { uid: user.uid, name });
     await navigate(`/m/${id}`);
   };
 
